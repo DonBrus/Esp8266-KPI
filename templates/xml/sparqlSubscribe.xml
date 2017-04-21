@@ -1,0 +1,77 @@
+<SSAP_message>
+<transaction_type>SUBSCRIBE</transaction_type>
+<message_type>REQUEST</message_type>
+<transaction_id>29</transaction_id>
+<node_id>ec800532-d416-41dc-ac08-c0de9b33ae8a</node_id>
+<space_id>X</space_id>
+<parameter name = "type">sparql</parameter>
+<parameter name = "query">select ?a ?b ?c where { ?a ?b ?c }</parameter>
+</SSAP_message>
+
+<SSAP_message>
+<node_id>ec800532-d416-41dc-ac08-c0de9b33ae8a</node_id>
+<space_id>RDF_SIB_ALf3</space_id>
+<transaction_id>29</transaction_id>
+<transaction_type>SUBSCRIBE</transaction_type>
+<message_type>CONFIRM</message_type>
+<parameter name="status">m3:Success</parameter>
+<parameter name="results"><sparql xmlns="http://www.w3.org/2005/sparql-results#">
+<head>
+<variable name="a" />
+<variable name="b" />
+<variable name="c" />
+</head>
+<results>
+<result>
+<binding name="a"><uri>http://ns#a1</uri></binding>
+<binding name="b"><uri>http://ns#b1</uri></binding>
+<binding name="c"><uri>http://ns#c1</uri></binding>
+</result>
+</results>
+</sparql>
+</parameter>
+<parameter name="subscription_id">78ec4fd4-6fef-4206-8623-058a17e1f660</parameter>
+</SSAP_message>
+
+
+<SSAP_message>
+<message_type>INDICATION</message_type>
+<transaction_type>SUBSCRIBE</transaction_type>
+<space_id>RDF_SIB_ALf3</space_id>
+<node_id>3b5f20ac-e2a0-4ec8-a81e-4a2f820abf34</node_id>
+<transaction_id>0</transaction_id>
+<parameter name="ind_sequence">5</parameter>
+<parameter name="subscription_id">9d3dbcfc-d7d6-4659-b7e8-012656a73979</parameter>
+<parameter name="new_results">
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+<head>
+<variable name="a" />
+<variable name="b" />
+<variable name="c" />
+</head>
+<results>
+<result>
+<binding name="a"><uri>http://ns#a1</uri></binding>
+<binding name="b"><uri>http://ns#b1</uri></binding>
+<binding name="c"><uri>http://ns#c1</uri></binding>
+</result>
+</results>
+</sparql>
+</parameter>
+<parameter name="obsolete_results">
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+<head>
+<variable name="a" />
+<variable name="b" />
+<variable name="c" />
+</head>
+<results>
+<result>
+<binding name="a"><uri>http://ns#a</uri></binding>
+<binding name="b"><uri>http://ns#b</uri></binding>
+<binding name="c"><uri>http://ns#c</uri></binding>
+</result>
+</results>
+</sparql>
+</parameter>
+</SSAP_message>

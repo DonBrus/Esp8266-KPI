@@ -1,0 +1,21 @@
+<SSAP_message>
+<transaction_type>PERSISTENT_UPDATE</transaction_type>
+<message_type>REQUEST</message_type>
+<transaction_id>30</transaction_id>
+<node_id>3b5f20ac-e2a0-4ec8-a81e-4a2f820abf34</node_id>
+<space_id>X</space_id>
+<parameter name="query" encoding="SPARQL-UPDATE">insert { ?c ?b ?a } where {  ?a ?b ?c }
+</parameter>
+<parameter name = "confirm">TRUE</parameter>
+</SSAP_message>
+
+
+<SSAP_message>
+<message_type>CONFIRM</message_type>
+<transaction_type>PERSISTENT_UPDATE</transaction_type>
+<transaction_id>30</transaction_id>
+<space_id>RDF_SIB_ALf3</space_id>
+<node_id>3b5f20ac-e2a0-4ec8-a81e-4a2f820abf34</node_id>
+<parameter name="status">m3:Success</parameter>
+<parameter name="update_id">122af69e-03f1-4d32-8b83-b02577c8450f</parameter>
+</SSAP_message>

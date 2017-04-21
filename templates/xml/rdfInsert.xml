@@ -1,0 +1,26 @@
+<SSAP_message>
+<message_type>REQUEST</message_type>
+<transaction_type>INSERT</transaction_type>
+<transaction_id>36</transaction_id>
+<node_id>05dc59c2-e789-4df7-9591-a7630684308d</node_id>
+<space_id>X</space_id>
+<parameter name="confirm">TRUE</parameter>
+<parameter name="insert_graph"  encoding="RDF-M3">
+<triple_list>
+<triple>
+<subject type="uri">http://ns#a</subject>
+<predicate>http://ns#b</predicate>
+<object type="uri">http://ns#c</object>
+</triple>
+</triple_list>
+</parameter>
+</SSAP_message>
+
+<SSAP_message>
+<transaction_type>INSERT</transaction_type>
+<message_type>CONFIRM</message_type>
+<transaction_id>35</transaction_id>
+<node_id>05dc59c2-e789-4df7-9591-a7630684308d</node_id>
+<space_id>RDF_SIB_ALf3</space_id>
+<parameter name="status">m3:Success</parameter>
+</SSAP_message>

@@ -1,0 +1,33 @@
+<SSAP_message>
+<transaction_type>QUERY</transaction_type>
+<message_type>REQUEST</message_type>
+<transaction_id>25</transaction_id>
+<node_id>ec800532-d416-41dc-ac08-c0de9b33ae8a</node_id>
+<space_id>X</space_id>
+<parameter name = "type">sparql</parameter>
+<parameter name = "query">select ?a ?b ?c where { ?a ?b ?c }</parameter>
+</SSAP_message>
+
+
+
+<SSAP_message>
+<node_id>ec800532-d416-41dc-ac08-c0de9b33ae8a</node_id>
+<space_id>RDF_SIB_ALf3</space_id>
+<transaction_id>24</transaction_id>
+<transaction_type>QUERY</transaction_type>
+<message_type>CONFIRM</message_type>
+<parameter name="results"><sparql xmlns="http://www.w3.org/2005/sparql-results#">
+<head><variable name="a" />
+<variable name="b" /><variable name="c" />
+</head>
+<results />
+<result>
+<binding name="a"><uri>http://ns#a1</uri></binding>
+<binding name="b"><uri>http://ns#b1</uri></binding>
+<binding name="c"><uri>http://ns#c1</uri></binding>
+</result>
+</results>
+</sparql>
+</parameter>
+<parameter name="status">m3:Success</parameter>
+</SSAP_message>

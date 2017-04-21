@@ -1,0 +1,20 @@
+
+
+<SSAP_message>
+<message_type>REQUEST</message_type>
+<transaction_type>JOIN</transaction_type>
+<transaction_id>28</transaction_id>
+<node_id>05dc59c2-e789-4df7-9591-a7630684308d</node_id>
+<space_id>X</space_id>
+</SSAP_message>
+
+
+
+<SSAP_message>
+<transaction_type>JOIN</transaction_type>
+<message_type>CONFIRM</message_type>
+<transaction_id>27</transaction_id>
+<node_id>05dc59c2-e789-4df7-9591-a7630684308d</node_id>
+<space_id>RDF_SIB_ALf3</space_id>
+<parameter name="status">m3:Success</parameter>
+</SSAP_message>

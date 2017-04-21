@@ -1,0 +1,18 @@
+<SSAP_message>
+<transaction_type>UNSUBSCRIBE</transaction_type>
+<message_type>REQUEST</message_type>
+<transaction_id>23</transaction_id>
+<node_id>ec800532-d416-41dc-ac08-c0de9b33ae8a</node_id>
+<space_id>X</space_id>
+<parameter name = "subscription_id">a5cdad87-8557-4220-86bc-40578ddb65cf</parameter>
+</SSAP_message>
+
+<SSAP_message>
+<message_type>CONFIRM</message_type>
+<transaction_type>UNSUBSCRIBE</transaction_type>
+<transaction_id>5</transaction_id>
+<space_id>X</space_id>
+<node_id>ec800532-d416-41dc-ac08-c0de9b33ae8a</node_id>
+<parameter name="status">m3:Success</parameter>
+<parameter name="subscription_id">a5cdad87-8557-4220-86bc-40578ddb65cf</parameter>
+</SSAP_message>
