@@ -33,7 +33,7 @@ void KP::analyzeMessage() {
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Contents KP::create(char type, char *state , Triple t) {
+Contents KP::create(char type, char *state) {
 
   Contents c;
 
@@ -56,33 +56,33 @@ Contents KP::create(char type, char *state , Triple t) {
       strcpy(c.content, _nodeID);
       if (type == 'j' || type == 'l') *state = 'f'; //"finished"
       else if (type == 'u') *state = 'u';
-      else *state = 's';
+      else *state = 't';
       break;
 
     case 'u':
-      strcpy_P(c.type, PSTR("parameter name = \"subscription_id\""));
+      strcpy_P(c.type, PSTR("<parameter name = \"subscription_id\">"));
       strcpy(c.content, _subID1);
       *state = 'f';
 
       break;
 
-    case 's':
-      strcpy_P(c.type, PSTR("subject type=\"uri\""));
-      strcpy(c.content, t.subject);
-      *state = 'p';
-      break;
-
-    case 'p':
-      strcpy_P(c.type, PSTR("predicate"));
-      strcpy(c.content, t.predicate);
-      *state = 'o';
-      break;
-
-    case 'o':
-      strcpy_P(c.type, PSTR("object type=\"uri\""));
-      strcpy(c.content, t.object);
-      *state = 'f';
-      break;
+    //    case 's':
+    //      strcpy_P(c.type, PSTR("<subject type=\"uri\">"));
+    //      strcpy(c.content, t.subject);
+    //      *state = 'p';
+    //      break;
+    //
+    //    case 'p':
+    //      strcpy_P(c.type, PSTR("<predicate>"));
+    //      strcpy(c.content, t.predicate);
+    //      *state = 'o';
+    //      break;
+    //
+    //    case 'o':
+    //      strcpy_P(c.type, PSTR("<object type=\"uri\">"));
+    //      strcpy(c.content, t.object);
+    //      *state = 'f';
+    //      break;
 
     case 'f':
     case 'z':
@@ -94,42 +94,43 @@ Contents KP::create(char type, char *state , Triple t) {
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void KP::composeMessage(char type, Triple t) {
+void KP::sendMessage(char type, Triple *t) {
 
   #ifdef DEBUG
   Serial.println(F("-----------COMPOSING----------"));
   #endif
 
   _comm.connect(_ip, _port);
-  if(!_comm.connected()){
+  if (!_comm.connected()) {
     Serial.println("CLIENT ERROR");
     return;
   }
 
   char c, cState = 'i'; //first part of the contents chain will always be the transaction id
-  char state, lastState ; // used by the sequence reader
 
-  char tagName[MAX_NAME_SIZE] = {""}, buffer[MAX_BUFFER_SIZE] = {""};
-
-  byte i = 0, count = 0; //i : needed for knowing the length of buffered tag name
-
-  bool readingName = false, last = true;
+  char buffer[MAX_BUFFER_SIZE] = {""};
 
   char* loc;
-  short pos=0;
+  short pos = 0;
 
-  Contents curr = create(type, &cState, t);
+  Triple *index = t;
+
+  Contents curr = create(type, &cState);
 
   switch (type) {
-    
+
     case 'j':
       strcpy(buffer, joinTemplate);
       break;
-      
+
+    case 'i':
+      strcpy(buffer, insertTemplate);
+      break;
+
     case 'l':
       strcpy(buffer, leaveTemplate);
       break;
-    
+
 
   }
 
@@ -137,14 +138,42 @@ void KP::composeMessage(char type, Triple t) {
 
     loc = strstr(buffer, curr.type);
     if (loc != NULL) {
-      pos=loc-buffer+strlen(curr.type);
-      append(buffer, curr.content,pos);
+      pos = loc - buffer + strlen(curr.type);
+      append(buffer, curr.content, pos);
     }
 
-    curr = create(type, &cState, t);
+    curr = create(type, &cState);
+
+    if (cState == 't' && type == 'i') { //set of triples to insert into the buffer
+      loc = strstr(buffer, "<triple_list>");  //trova il punto di inizio della lista
+      
+      if (loc != NULL) {
+        
+        char  triple[100]="<triple>";   //17= 1 + 2*strlen("<triple>")        
+        pos = loc - buffer + strlen("<triple_list><subject type=\"uri\">"); //posizionati all'inizio della lista
+        
+        while (index!= NULL) {   //fill the triple string buffer with details of the triple
+          
+          strcat(triple,index->subject);  //copia il soggetto della stringa buffer della tripla
+          strcat_P(triple,PSTR("</subject><predicate>"));  //copia i campi xml accessori 
+          strcat(triple,index->predicate);
+          strcat_P(triple,PSTR("</predicate><object type=\"uri\">"));
+          strcat(triple,index->object);
+          strcat_P(triple,PSTR("</object>"));
+          
+          append(buffer, triple, pos);  //metti la tripla nel buffer (pos deve essere su '>' di <triple_list>
+          pos+=strlen(triple);  //aggiorna la posizione per eventuale altre triple
+          strcpy(triple,"");  //svuota il buffer per la tripla
+          index=index->next;  //aggiorna il puntatore
+        }
+        
+      }
+      cState='f'; //finisci di generare contenuto per l'insert
+    }
 
   }
-
+  
+  Serial.println(buffer);
   _comm.print(buffer);
   //_comm.write(4); //EOT
 

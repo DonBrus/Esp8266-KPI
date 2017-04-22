@@ -7,12 +7,12 @@ Ticker yielder;
 #define NETSSID "Alice-55361560"
 #define NETPSW  "20c1af385935b78a3mea1385"
 
-void wait(){
-  static byte count=0;
+void wait() {
+  static byte count = 0;
   count++;
-  if(count>30){
+  if (count > 30) {
     delay(10);
-    count=0;
+    count = 0;
   }
 }
 
@@ -26,24 +26,18 @@ void setup() {
 
   delay(500); //for esp bg functions
 
-  Triple* first,*index;
-  
-  first=new Triple;
-  strcpy(first->subject,"1");
-  first->next=new Triple;
-  index=first->next;
-  strcpy(index->subject,"2");
-  index->next=NULL;
+  Triple* list = new Triple;
 
-  index=first;
-  do{
-    Serial.println(index->subject);
-    index=index->next;
-  }while(index->next!=NULL);
-  
+
+  strcpy(list->subject, "http://ns#a");
+  strcpy(list->predicate, "http://ns#b");
+  strcpy(list->object, "http://ns#c");
+  list->next = NULL;
+
 
   kpi.join();
-  kpi.join();
+
+  kpi.insert(list);
 
   kpi.leave();
 

@@ -1,13 +1,13 @@
 #include "KPI.h"
 
-void KP::transaction(char type, Triple c) {
+void KP::transaction(char type, Triple *t) {
   byte i = 0;
   while (i < 3) {
 
     switch (i) {
 
       case 0:
-        composeMessage(type, c);
+        sendMessage(type, t);
         delay(500);
         break;
 
@@ -37,39 +37,18 @@ void KP::transaction(char type, Triple c) {
 }
 
 void KP::join() {
-  Triple foo;
-  transaction('j', foo);
-
+  transaction('j', NULL);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
-void KP::rdfInsert(Triple cont) {
-  transaction('i', cont);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------
-
-void KP::rdfRemove(Triple cont) {
-  transaction('r', cont);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------
-
-void KP::rdfQuery(Triple cont) {
-  transaction('q', cont);
-}
-
-//------------------------------------------------------------------------------------------------------------------------------------
-
-void KP::rdfSubscribe(Triple cont) {
-  transaction('s', cont);
+void KP::insert(Triple *t) {
+  transaction('i', t);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
 void KP::leave() {
-  Triple foo;
-  transaction('l', foo);
+  transaction('l',NULL);
 }
 

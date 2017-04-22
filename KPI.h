@@ -24,7 +24,7 @@
 #define MAX_SSID_LENGTH 20
 #define MAX_PSW_LENGTH 20
 
-#define MAX_BUFFER_SIZE 500
+#define MAX_BUFFER_SIZE 750
 #define MAX_NAME_SIZE 30
 #define MAX_CONTENT_SIZE 30
 #define MAX_URI_SIZE 15
@@ -63,7 +63,7 @@ class KP {
     byte getState();//returns the current state of the machine (error code)
 
     void join();
-    void rdfInsert(Triple cont);
+    void insert(Triple *t);
     void rdfQuery(Triple cont);
     void rdfSubscribe(Triple cont);
     void rdfRemove(Triple cont);
@@ -88,11 +88,11 @@ class KP {
 
     void receive();
 
-    void composeMessage(char code, Triple t);
+    void sendMessage(char code, Triple *t);
     void analyzeMessage();
-    Contents create(char type, char *state , Triple t);
+    Contents create(char type, char *state);
 
-    void transaction(char type, Triple c);
+    void transaction(char type, Triple *t);
 
 };
 
