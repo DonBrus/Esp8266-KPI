@@ -29,12 +29,12 @@ bool WiFiConnect(const char ssid[], const char pass[]) {
 //--------------------------------------------------------------------------------------------------------------
 
 void append(char buffer[], const char cont[], int pos) {
-  char tmp[500] = {""};
+  char tmp[MAX_BUFFER_SIZE] = {""};
 
   strncpy(tmp, buffer, pos); // copy at most first pos characters
   short len = strlen(tmp);
-  strcpy(tmp + len, cont); // copy all of insert[] at the end
-  len += strlen(cont);  // increase the length by length of insert[]
+  strcpy(tmp + len, cont); // copy all of cont[] at the end
+  len += strlen(cont);  // increase the length by length of cont[]
   strcpy(tmp + len, buffer + pos); // copy the rest
 
   strcpy(buffer, tmp);

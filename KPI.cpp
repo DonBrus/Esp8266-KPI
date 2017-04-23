@@ -37,12 +37,6 @@ Contents KP::create(char type, char *state) {
 
   Contents c;
 
-  /*
-     trId,nodeId,unsub,sub,obj,pred
-     the state coupled with the type of message that is being built will determine whether there's still content to be built;
-     otherwise the returning struct will have a field indicating that no more content is going to be added / searched for
-  */
-
   switch (*state) {
 
     case 'i':
@@ -106,16 +100,16 @@ void KP::sendMessage(char type, Triple *t) {
     return;
   }
 
-  char c, cState = 'i'; //first part of the contents chain will always be the transaction id
+  char cState = 'i'; //first part of the contents chain will always be the transaction id
 
-  char buffer[MAX_BUFFER_SIZE] = {""};
+  char buffer[MAX_BUFFER_SIZE * 2] = {""};
 
   char* loc;
   short pos = 0;
 
   Triple *index = t;
 
-  Contents curr = create(type, &cState);
+  Contents curr;
 
   switch (type) {
 
@@ -136,43 +130,54 @@ void KP::sendMessage(char type, Triple *t) {
 
   while (cState != 'z') { //z means no more content to be added
 
-    loc = strstr(buffer, curr.type);
+    curr = create(type, &cState);
+
+    loc = strstr(buffer, curr.type);  //locate the tag substring inside the template
+
     if (loc != NULL) {
-      pos = loc - buffer + strlen(curr.type);
+      pos = loc - buffer + strlen(curr.type); //posizionati alla fine del tag cercato
       append(buffer, curr.content, pos);
     }
 
-    curr = create(type, &cState);
+
 
     if (cState == 't' && type == 'i') { //set of triples to insert into the buffer
       loc = strstr(buffer, "<triple_list>");  //trova il punto di inizio della lista
-      
+
       if (loc != NULL) {
-        
-        char  triple[100]="<triple>";   //17= 1 + 2*strlen("<triple>")        
-        pos = loc - buffer + strlen("<triple_list><subject type=\"uri\">"); //posizionati all'inizio della lista
-        
-        while (index!= NULL) {   //fill the triple string buffer with details of the triple
-          
-          strcat(triple,index->subject);  //copia il soggetto della stringa buffer della tripla
-          strcat_P(triple,PSTR("</subject><predicate>"));  //copia i campi xml accessori 
-          strcat(triple,index->predicate);
-          strcat_P(triple,PSTR("</predicate><object type=\"uri\">"));
-          strcat(triple,index->object);
-          strcat_P(triple,PSTR("</object>"));
-          
+
+        char  triple[100 * 2] = ""; //17= 1 + 2*strlen("<triple>")
+        pos = loc - buffer + strlen("<triple_list>"); //posizionati all'inizio della lista
+
+        while (index != NULL) {  //fill the triple string buffer with details of the triple
+
+          strcat_P(triple, PSTR("<triple><subject type=\"uri\">"));
+          strcat(triple, index->subject); //copia il soggetto della stringa buffer della tripla
+          strcat_P(triple, PSTR("</subject><predicate>")); //copia i campi xml accessori
+          strcat(triple, index->predicate);
+          strcat_P(triple, PSTR("</predicate><object type=\"uri\">"));
+          strcat(triple, index->object);
+          strcat_P(triple, PSTR("</object></triple>"));
+
+          Serial.println(triple);
+
           append(buffer, triple, pos);  //metti la tripla nel buffer (pos deve essere su '>' di <triple_list>
-          pos+=strlen(triple);  //aggiorna la posizione per eventuale altre triple
-          strcpy(triple,"");  //svuota il buffer per la tripla
-          index=index->next;  //aggiorna il puntatore
+
+          Serial.println(buffer);
+
+          pos = pos + strlen(triple); //aggiorna la posizione per eventuale altre triple
+
+          strcpy(triple, ""); //svuota il buffer per la tripla
+
+          index = index->next; //aggiorna il puntatore
         }
-        
+
       }
-      cState='f'; //finisci di generare contenuto per l'insert
+      cState = 'f'; //finisci di generare contenuto per l'insert
     }
 
   }
-  
+
   Serial.println(buffer);
   _comm.print(buffer);
   //_comm.write(4); //EOT

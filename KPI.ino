@@ -27,13 +27,20 @@ void setup() {
   delay(500); //for esp bg functions
 
   Triple* list = new Triple;
+  Triple  *c;
 
 
   strcpy(list->subject, "http://ns#a");
   strcpy(list->predicate, "http://ns#b");
   strcpy(list->object, "http://ns#c");
-  list->next = NULL;
+  list->next = new Triple;
+  c=list->next;
+  strcpy(c->subject, "http://ns#a2");
+  strcpy(c->predicate, "http://ns#b2");
+  strcpy(c->object, "http://ns#c2");
+  c->next=NULL;
 
+  checkList(list);
 
   kpi.join();
 
@@ -46,5 +53,23 @@ void setup() {
 
 void loop() {
 
+}
+
+void makeTriple(char baseURI[MAX_URI_SIZE],char sub[MAX_URI_SIZE],char pred[MAX_URI_SIZE],char obj[MAX_URI_SIZE],Triple *list){
+  
+}
+
+void checkList(Triple *list){
+  Triple *index=list;
+  byte i=1;
+  while(index!=NULL){
+    Serial.print("Triple number ");
+    Serial.print(i++);
+    Serial.println(" is:");
+    Serial.println(index->subject);
+    Serial.println(index->predicate);
+    Serial.println(index->object);
+    index=index->next;
+  }
 }
 
