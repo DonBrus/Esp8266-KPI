@@ -1,26 +1,23 @@
 #include "KPI.h"
 
 void KP::transaction(char type, Triple *t) {
-  byte i = 0;
+  byte i = 0, tries = 0;
+  bool response = false;
+  char c;
+
   while (i < 3) {
 
     switch (i) {
 
       case 0:
+      
         sendMessage(type, t);
         delay(500);
         break;
 
       case 1:
-        //receive();
-
-        Serial.println("WAITING FOR RESPONSE");
-        char c;
-        while (_comm.available()) {
-          c = _comm.read();
-          Serial.print(c);
-        }
-
+      
+        receiveReply(type);
 
         break;
 
@@ -49,6 +46,6 @@ void KP::insert(Triple *t) {
 //------------------------------------------------------------------------------------------------------------------------------------
 
 void KP::leave() {
-  transaction('l',NULL);
+  transaction('l', NULL);
 }
 

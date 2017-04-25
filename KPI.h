@@ -31,21 +31,19 @@
 #define MAX_ID_SIZE 20
 #define MAX_SUBSCRIPTION_SIZE 30
 
-#define MAX_PACKET_SIZE 60
-#define TX_LATENCY 2000
-
-
+#define TIME_BETWEEN_TRIES  300
 
 struct Contents {
   char type[MAX_NAME_SIZE] = "";
   char content[MAX_CONTENT_SIZE] = "";
-  Contents* next;
 };
 
 struct Triple {
-  char subject[MAX_URI_SIZE];
-  char predicate[MAX_URI_SIZE];
-  char object[MAX_URI_SIZE];
+  char subject[MAX_URI_SIZE * 2];
+  char predicate[MAX_URI_SIZE * 2];
+  char object[MAX_URI_SIZE * 2];
+  char subtype[10] = "uri";
+  char objtype[10] = "uri";
   Triple* next;
 };
 
@@ -53,20 +51,20 @@ struct Triple {
 class KP {
   public:
 
-    KP(char ID[] = "ESP8266_KPI", short TR = 1);
+    KP(char ID[] = "", short TR = 1);
 
     void begin(char SSID[MAX_SSID_LENGTH], char psw[MAX_PSW_LENGTH], short p = 10010, byte a = 0, byte b = 0, byte c = 0, byte d = 0); //Connect to WiFi network , then to
 
     char* getID();
-    //void setID(char id[]); //random initialization at creation , unless explicitly defined in the instance call
+    //void setID(char id[]); //default initialization at creation , unless explicitly defined in the instance call
     short getTR();
     byte getState();//returns the current state of the machine (error code)
 
     void join();
-    void insert(Triple *t);
-    void rdfQuery(Triple cont);
-    void rdfSubscribe(Triple cont);
-    void rdfRemove(Triple cont);
+    void insert(Triple *t); //RDF
+    void query(Triple *t);  //SPARQL
+    void subscribe(Triple *t);  //SPARQL
+    void unsubscribe(Triple *t);  //SPARQL
     void leave();
 
 
@@ -83,15 +81,16 @@ class KP {
     byte _status;
 
     WiFiClient _comm; //socket used for main communication
-    //WiFiClient* _s1,_s2,_last; //two socket available for communication , plus one eventually used for the "last will"
+    WiFiClient _s1 , _s2 , _last; //two socket available for communication , plus one eventually used for the "last will"
 
 
     void receive();
 
     void sendMessage(char code, Triple *t);
-    void analyzeMessage();
-    Contents create(char type, char *state);
+    void receiveReply(char type);
 
+    void parserHelper(char type,char *state,char *search);
+    Contents create(char type, char *state);
     void transaction(char type, Triple *t);
 
 };

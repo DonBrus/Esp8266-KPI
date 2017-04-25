@@ -1,9 +1,17 @@
 #include "KPI.h"
 
 KP::KP(char ID[], short TR ) {
+  
+  if(strcmp(ID,"")==0){   //generate a random id if left blank by the user with chars between a-z
+    for (byte i=0;i<MAX_ID_SIZE;i++){
+      ID[i]=random(97,122);
+    }
+  }
+  
   strcpy(_nodeID, ID);
   _trID = TR;
   _status = OK;
+  
 }
 
 void KP::begin(char SSID[MAX_SSID_LENGTH], char psw[MAX_PSW_LENGTH], short p, byte a, byte b, byte c, byte d) { //a,b,c,d : bytes of the IP address,to be put in order
@@ -17,18 +25,6 @@ void KP::begin(char SSID[MAX_SSID_LENGTH], char psw[MAX_PSW_LENGTH], short p, by
 
 byte KP::getState() {
   return _status;
-}
-
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-void KP::receive() {
-
-}
-
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-void KP::analyzeMessage() {
-
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -60,23 +56,7 @@ Contents KP::create(char type, char *state) {
 
       break;
 
-    //    case 's':
-    //      strcpy_P(c.type, PSTR("<subject type=\"uri\">"));
-    //      strcpy(c.content, t.subject);
-    //      *state = 'p';
-    //      break;
-    //
-    //    case 'p':
-    //      strcpy_P(c.type, PSTR("<predicate>"));
-    //      strcpy(c.content, t.predicate);
-    //      *state = 'o';
-    //      break;
-    //
-    //    case 'o':
-    //      strcpy_P(c.type, PSTR("<object type=\"uri\">"));
-    //      strcpy(c.content, t.object);
-    //      *state = 'f';
-    //      break;
+    
 
     case 'f':
     case 'z':
@@ -151,7 +131,9 @@ void KP::sendMessage(char type, Triple *t) {
 
         while (index != NULL) {  //fill the triple string buffer with details of the triple
 
-          strcat_P(triple, PSTR("<triple><subject type=\"uri\">"));
+          strcat_P(triple, PSTR("<triple><subject type="));
+          strcat(triple,index->subtype);
+          strcat_P(triple,PSTR(">"));
           strcat(triple, index->subject); //copia il soggetto della stringa buffer della tripla
           strcat_P(triple, PSTR("</subject><predicate>")); //copia i campi xml accessori
           strcat(triple, index->predicate);
@@ -159,11 +141,8 @@ void KP::sendMessage(char type, Triple *t) {
           strcat(triple, index->object);
           strcat_P(triple, PSTR("</object></triple>"));
 
-          Serial.println(triple);
 
           append(buffer, triple, pos);  //metti la tripla nel buffer (pos deve essere su '>' di <triple_list>
-
-          Serial.println(buffer);
 
           pos = pos + strlen(triple); //aggiorna la posizione per eventuale altre triple
 
@@ -180,16 +159,107 @@ void KP::sendMessage(char type, Triple *t) {
 
   Serial.println(buffer);
   _comm.print(buffer);
-  //_comm.write(4); //EOT
+
 
 
   _status = OK;
   return;
+
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void KP::receiveReply(char type) {
+
+  char buffer[MAX_BUFFER_SIZE] = "";
+  char search[50] = "", result[50] = "";
+  char state = 'c', *loc = NULL; //partire da integrità logica del messaggio (es JOIN=JOIN)
+
+  short i = 0, pos = 0;
+
+  byte tries = 0;
+
+  bool replied = false;
+
+  Serial.println(F("WAITING FOR RESPONSE"));
+
+  while (!replied && tries++ <= 3) {
+    if (_comm.available()) {
+      char c;
+      replied = true;
+      while (_comm.available()) {
+        buffer[i++] = _comm.read();
+      }
+    }
+    else {
+      delay(TIME_BETWEEN_TRIES);
+    }
+  }
+
+  if (!replied) {
+    Serial.println(F("NO REPLY"));
+    return;
+  }
+
+  else Serial.println(buffer);
+
+  //ricerca dei vari risultati
+  //!!!!!!!!!!!!!!!!! -> Fare il check che la transazione nella risposta == quello che ci si aspetta (es. JOIN in risposta a JOIN)
+  
+  do {
+
+    switch (state) {
+
+    case 'i': //integrity
+      switch(type){
+        case 'j':
+        ;
+      }
+    
+    
+    case 'c': //message type
+      strcpy_P(search, PSTR("<message_type>")); //CONFIRM ; INDICATION ;
+      if (type == 'j' || type == 'l' || type == 'u' || type == 'i')  state = 'f'; //finished
+      else ; //altri tipi
+      break;
+
+    case 's': //sub_id, for subscribe and notification
+      break;
+
+    case 't': //triples , for query and notification
+      break;
+    
+
+    case 'f':
+      break;
+
+  }
+
+    loc = strstr(buffer, search); //ricerca il risultato
+    Serial.print("Searching for : ");
+    Serial.println(search);
+    
+    if (loc != NULL) {
+      pos = loc - buffer + strlen(search);
+      
+      for (i = pos; buffer[i] != '<'; i++) {
+        result[i-pos]=buffer[i];
+      }
+      
+      Serial.print("RESULT: ");
+      Serial.println(result);
+    }
+
+
+  } while (state != 'f');
+
 
 
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
+void KP::parserHelper(char type, char *state, char *search) {
+  
+}
 
