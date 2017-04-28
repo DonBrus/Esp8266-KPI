@@ -15,7 +15,7 @@ const PROGMEM char leaveTemplate[]={"<SSAP_message>\
 </SSAP_message>\
 "};
 
-const PROGMEM char insertTemplate[]={"<SSAP_message>\
+const PROGMEM char insertTemplate[]="<SSAP_message>\
 <message_type>REQUEST</message_type>\
 <transaction_type>INSERT</transaction_type>\
 <transaction_id></transaction_id>\
@@ -26,9 +26,9 @@ const PROGMEM char insertTemplate[]={"<SSAP_message>\
 <triple_list>\
 </triple_list>\
 </parameter>\
-</SSAP_message>"};
+</SSAP_message>";
 
-const PROGMEM char queryTemplate[]={"<SSAP_message>\
+const PROGMEM char queryTemplate[]="<SSAP_message>\
 <transaction_type>QUERY</transaction_type>\
 <message_type>REQUEST</message_type>\
 <transaction_id></transaction_id>\
@@ -36,7 +36,7 @@ const PROGMEM char queryTemplate[]={"<SSAP_message>\
 <space_id>X</space_id>\
 <parameter name = \"type\">sparql</parameter>\
 <parameter name = \"query\"></parameter>\
-</SSAP_message>"};
+</SSAP_message>";
 
 const PROGMEM char subscribeTemplate[]={"<SSAP_message>\
 <transaction_type>SUBSCRIBE</transaction_type>\

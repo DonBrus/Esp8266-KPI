@@ -35,6 +35,8 @@
 #define MAX_SUBS 2
 
 #define TIME_BETWEEN_TRIES  300
+#define YIELDING 
+#define YIELDING_TIME 20
 
 struct Contents {
   char type[MAX_NAME_SIZE] = "";
@@ -71,7 +73,7 @@ class KP {
 
     void join();
     void insert(Triple *t); //RDF
-    void query(char *q);  //SPARQL
+    void query(char query[MAX_QUERY_SIZE]);  //SPARQL
     void subscribe(char *q);  //SPARQL
     void unsubscribe(char sub);  //SPARQL
     void leave();

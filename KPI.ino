@@ -1,14 +1,14 @@
 #include "KPI.h"
 #include <Ticker.h>
 
-KP kpi("Huzzah");
+KP kpi("Huzza");
 //Ticker yielder;
 
-//#define NETSSID "Alice-55361560"
-//#define NETPSW  "20c1af385935b78a3mea1385"
+#define NETSSID "Alice-55361560"
+#define NETPSW  "20c1af385935b78a3mea1385"
 
-#define NETSSID "GATEWAY"
-#define NETPSW  "abcd1234"
+//#define NETSSID "GATEWAY"
+//#define NETPSW  "abcd1234"
 
 void wait() {
   static byte count = 0;
@@ -24,8 +24,8 @@ void setup() {
   //yielder.attach(0.5, wait);
 
   do {
-    //kpi.begin(NETSSID, NETPSW, 10010, 192, 168, 1, 14);
-    kpi.begin(NETSSID, NETPSW, 10010, 192, 168, 43, 52);
+    kpi.begin(NETSSID, NETPSW, 10010, 192, 168, 1, 14);
+    //kpi.begin(NETSSID, NETPSW, 10010, 192, 168, 43, 52);
   } while (kpi.getState() != 0);
 
   delay(500); //for esp bg functions
@@ -54,7 +54,9 @@ void setup() {
 
   kpi.join();
 
-  kpi.insert(list);
+  //kpi.insert(list);
+
+  kpi.query("PREFIX ss: <htttp://arduArm.com/ss#> SELECT ?arm ?task WHERE {?arm ss:hasTask ?task}");
 
   kpi.leave();
 
