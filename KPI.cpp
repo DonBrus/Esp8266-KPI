@@ -29,7 +29,7 @@ byte KP::getState() {
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Contents KP::create(char type, char *state) {
+Contents KP::create(char type, char *state,char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE]) {
 
   Contents c;
 
@@ -46,12 +46,18 @@ Contents KP::create(char type, char *state) {
       strcpy(c.content, _nodeID);
       if (type == 'j' || type == 'l') *state = 'f'; //"finished"
       else if (type == 'u') *state = 'u';
+      else if (type == 'q') *state = 'q';
       else *state = 't';
       break;
 
+    case 'q':
+      strcpy_P(c.type, PSTR("<parameter name = \"query\">"));
+      strcpy(c.content,query);
+      *state = 'f';
+
     case 'u':
       strcpy_P(c.type, PSTR("<parameter name = \"subscription_id\">"));
-      strcpy(c.content, _subID1);
+      strcpy(c.content, subid);
       *state = 'f';
 
       break;
@@ -68,17 +74,11 @@ Contents KP::create(char type, char *state) {
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void KP::sendMessage(char type, Triple *t) {
+void KP::sendMessage(char type, Triple *t ,char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE] ,WiFiClient *comm){
 
   #ifdef DEBUG
   Serial.println(F("-----------COMPOSING----------"));
   #endif
-
-  _comm.connect(_ip, _port);
-  if (!_comm.connected()) {
-    Serial.println("CLIENT ERROR");
-    return;
-  }
 
   char cState = 'i'; //first part of the contents chain will always be the transaction id
 
@@ -158,7 +158,7 @@ void KP::sendMessage(char type, Triple *t) {
   }
 
   Serial.println(buffer);
-  _comm.print(buffer);
+  comm->print(buffer);
 
 
 
