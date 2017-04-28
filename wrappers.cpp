@@ -1,10 +1,9 @@
 #include "KPI.h"
 
-void KP::transaction(char type, Triple *t) {
+void KP::transaction(char type, Triple *t , char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE] ) {
   byte i = 0, tries = 0;
   bool response = false;
   char c;
-<<<<<<< HEAD
   WiFiClient *client;
 
   if (type != 's' && type != 'u') { //se sono comunicazioni sulla socket comune
@@ -47,21 +46,19 @@ void KP::transaction(char type, Triple *t) {
   }
 
   delay(50);
-=======
->>>>>>> parent of e99219e... "create" still standalone
 
   while (i < 3) {
 
     switch (i) {
 
       case 0:
-      
-        sendMessage(type, t);
+
+        sendMessage(type, t , query, subid, client);
         delay(500);
         break;
 
       case 1:
-      
+
         receiveReply(type);
 
         break;
@@ -79,27 +76,18 @@ void KP::transaction(char type, Triple *t) {
 }
 
 void KP::join() {
-<<<<<<< HEAD
   transaction('j', NULL, "", "");
-=======
-  transaction('j', NULL);
->>>>>>> parent of e99219e... "create" still standalone
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
 void KP::insert(Triple *t) {
-<<<<<<< HEAD
   transaction('i', t, "", "");
-=======
-  transaction('i', t);
->>>>>>> parent of e99219e... "create" still standalone
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
 void KP::leave() {
-<<<<<<< HEAD
   transaction('l', NULL, "", "");
 }
 
@@ -122,8 +110,3 @@ void KP::query(char query[MAX_QUERY_SIZE]) {
   transaction('l', NULL);
   }
 */
-=======
-  transaction('l', NULL);
-}
-
->>>>>>> parent of e99219e... "create" still standalone
