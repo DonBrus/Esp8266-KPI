@@ -28,8 +28,13 @@ byte KP::getState() {
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
+<<<<<<< HEAD
 /*
   Contents KP::create(char type, char *state, char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE]) {
+=======
+
+Contents KP::create(char type, char *state) {
+>>>>>>> parent of e99219e... "create" still standalone
 
   Contents c;
 
@@ -46,10 +51,10 @@ byte KP::getState() {
       strcpy(c.content, _nodeID);
       if (type == 'j' || type == 'l') *state = 'f'; //"finished"
       else if (type == 'u') *state = 'u';
-      else if (type == 'q') *state = 'q';
       else *state = 't';
       break;
 
+<<<<<<< HEAD
     case 'q':
       strcpy_P(c.type, PSTR("<parameter name = \"query\">"));
       strcpy(c.content, query);
@@ -59,6 +64,12 @@ byte KP::getState() {
       strcpy_P(c.type, PSTR("<parameter name = \"subscription_id\">"));
       strcpy(c.content, subid);
        state = 'f';
+=======
+    case 'u':
+      strcpy_P(c.type, PSTR("<parameter name = \"subscription_id\">"));
+      strcpy(c.content, _subID1);
+      *state = 'f';
+>>>>>>> parent of e99219e... "create" still standalone
 
       break;
 
@@ -74,13 +85,27 @@ byte KP::getState() {
 */
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 void KP::sendMessage(char type, Triple *t , char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE] , WiFiClient *comm) {
+=======
+void KP::sendMessage(char type, Triple *t) {
+>>>>>>> parent of e99219e... "create" still standalone
 
   #ifdef DEBUG
   Serial.println(F("-----------COMPOSING----------"));
   #endif
 
+<<<<<<< HEAD
   char state = 'i'; //first part of the contents chain will always be the transaction id
+=======
+  _comm.connect(_ip, _port);
+  if (!_comm.connected()) {
+    Serial.println("CLIENT ERROR");
+    return;
+  }
+
+  char cState = 'i'; //first part of the contents chain will always be the transaction id
+>>>>>>> parent of e99219e... "create" still standalone
 
   char buffer[MAX_BUFFER_SIZE] ="";
 
@@ -210,7 +235,7 @@ void KP::sendMessage(char type, Triple *t , char query[MAX_QUERY_SIZE], char sub
   } while (state != 'z') ;
 
   Serial.println(buffer);
-  comm->print(buffer);
+  _comm.print(buffer);
 
   Serial.println("SENT");
 

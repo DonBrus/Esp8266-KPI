@@ -35,8 +35,13 @@ const PROGMEM char queryTemplate[]="<SSAP_message>\
 <node_id></node_id>\
 <space_id>X</space_id>\
 <parameter name = \"type\">sparql</parameter>\
+<<<<<<< HEAD
 <parameter name = \"query\"></parameter>\
 </SSAP_message>";
+=======
+<parameter name = \"query\">select ?a ?b ?c where { ?a ?b ?c }</parameter>\
+</SSAP_message>"};
+>>>>>>> parent of e99219e... "create" still standalone
 
 const PROGMEM char subscribeTemplate[]={"<SSAP_message>\
 <transaction_type>SUBSCRIBE</transaction_type>\
@@ -45,7 +50,7 @@ const PROGMEM char subscribeTemplate[]={"<SSAP_message>\
 <node_id></node_id>\
 <space_id>X</space_id>\
 <parameter name = \"type\">sparql</parameter>\
-<parameter name = \"query\"></parameter>\
+<parameter name = \"query\">select ?a ?b ?c where { ?a ?b ?c }</parameter>\
 </SSAP_message>"};
 
 const PROGMEM char unsubscribeTemplate[]={"<SSAP_message>\

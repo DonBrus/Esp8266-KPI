@@ -27,12 +27,9 @@
 #define MAX_BUFFER_SIZE 1000
 #define MAX_NAME_SIZE 30
 #define MAX_CONTENT_SIZE 30
-#define MAX_URI_SIZE 30
-#define MAX_ID_SIZE 30
-#define MAX_SUBID_SIZE 30
-#define MAX_QUERY_SIZE 200
-
-#define MAX_SUBS 2
+#define MAX_URI_SIZE 15
+#define MAX_ID_SIZE 20
+#define MAX_SUBSCRIPTION_SIZE 30
 
 #define TIME_BETWEEN_TRIES  300
 #define YIELDING 
@@ -52,12 +49,6 @@ struct Triple {
   Triple* next;
 };
 
-struct Subscription{
-  char subID[MAX_SUBID_SIZE];
-  WiFiClient in;
-  boolean isActive=false;
-};
-
 
 class KP {
   public:
@@ -73,9 +64,15 @@ class KP {
 
     void join();
     void insert(Triple *t); //RDF
+<<<<<<< HEAD
     void query(char query[MAX_QUERY_SIZE]);  //SPARQL
     void subscribe(char *q);  //SPARQL
     void unsubscribe(char sub);  //SPARQL
+=======
+    void query(Triple *t);  //SPARQL
+    void subscribe(Triple *t);  //SPARQL
+    void unsubscribe(Triple *t);  //SPARQL
+>>>>>>> parent of e99219e... "create" still standalone
     void leave();
 
 
@@ -86,17 +83,23 @@ class KP {
 
     short _port; //port used by the SIB server
     byte _ip[4];
+    char _subID1[MAX_SUBSCRIPTION_SIZE];
+    char _subID2[MAX_SUBSCRIPTION_SIZE];
+
     byte _status;
 
-    WiFiClient _comm, _last; //socket used for main communication, plus one eventually used for the "last will"
-    Subscription _s1 , _s2 ; //two available subscriptions
+    WiFiClient _comm; //socket used for main communication
+    WiFiClient _s1 , _s2 , _last; //two socket available for communication , plus one eventually used for the "last will"
 
-    void sendMessage(char type, Triple *t ,char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE] ,WiFiClient *comm);
+
+    void receive();
+
+    void sendMessage(char code, Triple *t);
     void receiveReply(char type);
 
     void parserHelper(char type,char *state,char *search);
-    Contents create(char type, char *state,char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE]);
-    void transaction(char type, Triple *t ,char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE] );
+    Contents create(char type, char *state);
+    void transaction(char type, Triple *t);
 
 };
 
