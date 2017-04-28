@@ -2,7 +2,7 @@
 #include <Ticker.h>
 
 KP kpi("Huzza");
-//Ticker yielder;
+
 
 #define NETSSID "Alice-55361560"
 #define NETPSW  "20c1af385935b78a3mea1385"
@@ -10,18 +10,8 @@ KP kpi("Huzza");
 //#define NETSSID "GATEWAY"
 //#define NETPSW  "abcd1234"
 
-void wait() {
-  static byte count = 0;
-  count++;
-  if (count > 30) {
-    yield();
-    count = 0;
-  }
-}
-
 void setup() {
   Serial.begin(57600);
-  //yielder.attach(0.5, wait);
 
   do {
     kpi.begin(NETSSID, NETPSW, 10010, 192, 168, 1, 14);
@@ -44,19 +34,15 @@ void setup() {
   strcpy(c->object, "http://ns#c2");
   c->next = NULL;
 
-  //  makeTriple("http://ns#","Mary","Has","Lamb",list);
-  //  c=list;
-  //  makeTriple("http://ns#","Jack","Is","Dull",c->next);
-  //  c=c
-  //  c->next=NULL;
-
   checkList(list);
 
   kpi.join();
 
-  //kpi.insert(list);
+  kpi.insert(list);
 
   kpi.query("PREFIX ss: <htttp://arduArm.com/ss#> SELECT ?arm ?task WHERE {?arm ss:hasTask ?task}");
+
+  kpi.subscribe("PREFIX ss: <http://arduArm.com/ss#> SELECT ?arm ?task WHERE {?arm ss:hasTask ?task}");
 
   kpi.leave();
 
@@ -66,27 +52,6 @@ void setup() {
 void loop() {
 
 }
-
-//void makeTriple(char baseURI[MAX_URI_SIZE],char sub[MAX_URI_SIZE],char pred[MAX_URI_SIZE],char obj[MAX_URI_SIZE],Triple *i){
-//  char tmp[MAX_URI_SIZE*2];
-//  i=new Triple;
-//
-//  strcat(tmp,baseURI);
-//  strcat(tmp,sub);
-//  strcpy(i->subject,tmp);
-//  strcpy(tmp,"");
-//
-//  strcat(tmp,baseURI);
-//  strcat(tmp,pred);
-//  strcpy(i->predicate,tmp);
-//  strcpy(tmp,"");
-//
-//  strcat(tmp,baseURI);
-//  strcat(tmp,obj);
-//  strcpy(i->object,tmp);
-//  strcpy(tmp,"");
-//
-//}
 
 void checkList(Triple *list) {
   Triple *index = list;

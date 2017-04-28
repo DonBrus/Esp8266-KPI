@@ -1,8 +1,7 @@
 #ifndef KPI.h
 #define KPI.h
 
-
-#if ARDUINO>=100
+#if ARDUINO>=100  //NECESSARIO PER PROGMEM
   #include "Arduino.h"
 #else
   #include "WProgram.h"
@@ -17,15 +16,11 @@
 
 #define DEBUG 1
 
-#ifdef ADV_DEBUG
-  #include <MemoryFree.h>
-#endif
-
 #define MAX_SSID_LENGTH 20
 #define MAX_PSW_LENGTH 20
 
 #define MAX_BUFFER_SIZE 1000
-#define MAX_NAME_SIZE 30
+#define MAX_NAME_SIZE 50
 #define MAX_CONTENT_SIZE 30
 #define MAX_URI_SIZE 30
 #define MAX_ID_SIZE 30
@@ -35,8 +30,7 @@
 #define MAX_SUBS 2
 
 #define TIME_BETWEEN_TRIES  300
-#define YIELDING 
-#define YIELDING_TIME 20
+#define YIELDING_TIME 50
 
 struct Contents {
   char type[MAX_NAME_SIZE] = "";
@@ -74,7 +68,7 @@ class KP {
     void join();
     void insert(Triple *t); //RDF
     void query(char query[MAX_QUERY_SIZE]);  //SPARQL
-    void subscribe(char *q);  //SPARQL
+    void subscribe(char query[MAX_QUERY_SIZE]);  //SPARQL
     void unsubscribe(char sub);  //SPARQL
     void leave();
 
@@ -88,15 +82,17 @@ class KP {
     byte _ip[4];
     byte _status;
 
+    char _query[MAX_QUERY_SIZE];
+
     WiFiClient _comm, _last; //socket used for main communication, plus one eventually used for the "last will"
     Subscription _s1 , _s2 ; //two available subscriptions
 
-    void sendMessage(char type, Triple *t ,char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE] ,WiFiClient *comm);
+    void sendMessage(char type, Triple *t , char subid[MAX_SUBID_SIZE] ,WiFiClient *comm);
     void receiveReply(char type);
 
     void parserHelper(char type,char *state,char *search);
-    Contents create(char type, char *state,char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE]);
-    void transaction(char type, Triple *t ,char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE] );
+    //Contents create(char type, char *state,char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE]);
+    void transaction(char type, Triple *t ,char subid[MAX_SUBID_SIZE] );
 
 };
 

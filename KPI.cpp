@@ -28,53 +28,8 @@ byte KP::getState() {
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
-/*
-  Contents KP::create(char type, char *state, char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE]) {
 
-  Contents c;
-
-  switch (*state) {
-
-    case 'i':
-      strcpy_P(c.type, PSTR("<transaction_id>"));
-      itoa(_trID, c.content, 10);
-       state = 'n';
-      break;
-
-    case 'n':
-      strcpy_P(c.type, PSTR("<node_id>"));
-      strcpy(c.content, _nodeID);
-      if (type == 'j' || type == 'l') *state = 'f'; //"finished"
-      else if (type == 'u') *state = 'u';
-      else if (type == 'q') *state = 'q';
-      else *state = 't';
-      break;
-
-    case 'q':
-      strcpy_P(c.type, PSTR("<parameter name = \"query\">"));
-      strcpy(c.content, query);
-       state = 'f';
-
-    case 'u':
-      strcpy_P(c.type, PSTR("<parameter name = \"subscription_id\">"));
-      strcpy(c.content, subid);
-       state = 'f';
-
-      break;
-
-
-
-    case 'f':
-    case 'z':
-       state = 'z';
-
-  }
-  return c;
-  }
-*/
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-void KP::sendMessage(char type, Triple *t , char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE] , WiFiClient *comm) {
+void KP::sendMessage(char type, Triple *t , char subid[MAX_SUBID_SIZE] , WiFiClient *comm) {
 
   #ifdef DEBUG
   Serial.println(F("-----------COMPOSING----------"));
@@ -82,7 +37,7 @@ void KP::sendMessage(char type, Triple *t , char query[MAX_QUERY_SIZE], char sub
 
   char state = 'i'; //first part of the contents chain will always be the transaction id
 
-  char buffer[MAX_BUFFER_SIZE] ="";
+  char buffer[MAX_BUFFER_SIZE] = "";
 
   char* loc;
   short pos = 0;
@@ -105,16 +60,19 @@ void KP::sendMessage(char type, Triple *t , char query[MAX_QUERY_SIZE], char sub
       strcpy(buffer, queryTemplate);
       break;
 
+    case 's':
+      strcpy(buffer, subscribeTemplate);
+      break;
+
     case 'l':
       strcpy(buffer, leaveTemplate);
       break;
 
   }
-  Serial.println(buffer);
 
   //----------------------START MESSAGE CREATION--------------------
-  
-  do { 
+
+  do {
 
     switch (state) {
 
@@ -127,26 +85,20 @@ void KP::sendMessage(char type, Triple *t , char query[MAX_QUERY_SIZE], char sub
       case 'n':   //NODE ID
         strcpy_P(curr.type, PSTR("<node_id>"));
         strcpy(curr.content, _nodeID);
+
         if (type == 'j' || type == 'l') state = 'z'; //"finished"
-        /*
-        else if (type == 'u') state = 'u';  //goto unsubscribe
-        else if (type == 'q') state = 'q';  //goto query (also subscribe!)
-        
-        else state = 'i';   //goto INSERT
-        */
-        else state=type;
+        else state = type; //per ogni altra transazione type = stato
+
         break;
 
       case 's':   //SUBSCRIBE (same field of query)
         ;
-        
+
       case 'q':   //QUERY
-        strcpy(curr.type,"<parameter name = \"query\">");
-        //strcpy(curr.type,"sparql"); //!!!!!!!!!!!nemmeno sparql trova , il problema sta nel template!!
-        strcpy(curr.content, query);
-        Serial.println(curr.type);
-        Serial.println(curr.content);
+        strcpy_P(curr.type, PSTR("<parameter name = \"query\">"));
+        strcpy(curr.content, _query);
         state = 'z';
+        break;
 
       case 'u':   //UNSUBSCRIBE
         strcpy_P(curr.type, PSTR("<parameter name = \"subscription_id\">"));
@@ -163,8 +115,8 @@ void KP::sendMessage(char type, Triple *t , char query[MAX_QUERY_SIZE], char sub
       pos = loc - buffer + strlen(curr.type); //posizionati alla fine del tag cercato
       append(buffer, curr.content, pos);
     }
-    
-    else{
+
+    else {
       Serial.println(F("SUBSTRING NOT FOUND"));
       return;
     }
@@ -204,17 +156,13 @@ void KP::sendMessage(char type, Triple *t , char query[MAX_QUERY_SIZE], char sub
       }
       state = 'z'; //finisci di generare contenuto per l'insert
     }
-    
-  delay(YIELDING_TIME);   //avoid ESP8266 crashing
-  
+
+    delay(YIELDING_TIME);
+
   } while (state != 'z') ;
 
-  Serial.println(buffer);
+  //Serial.println(buffer);
   comm->print(buffer);
-
-  Serial.println("SENT");
-
-
 
   _status = OK;
   return;
@@ -274,7 +222,7 @@ void KP::receiveReply(char type) {
       case 'c': //message type
         strcpy_P(search, PSTR("<message_type>")); //CONFIRM ; INDICATION ;
         if (type == 'j' || type == 'l' || type == 'u' || type == 'i')  state = 'f'; //finished
-        else ; //altri tipi
+        else return; //altri tipi
         break;
 
       case 's': //sub_id, for subscribe and notification

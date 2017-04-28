@@ -1,10 +1,10 @@
 #include "KPI.h"
 
-void KP::transaction(char type, Triple *t , char query[MAX_QUERY_SIZE], char subid[MAX_SUBID_SIZE] ) {
-  byte i = 0, tries = 0;
-  bool response = false;
-  char c;
+void KP::transaction(char type, Triple *t = NULL , char subid[MAX_SUBID_SIZE] = "" ) {
+
   WiFiClient *client;
+
+  //!!!!!!!!!!!!!!!NOT UN/SUBSCRIBE : USE COMMON SOCKET
 
   if (type != 's' && type != 'u') { //se sono comunicazioni sulla socket comune
     _comm.connect(_ip, _port);
@@ -14,6 +14,8 @@ void KP::transaction(char type, Triple *t , char query[MAX_QUERY_SIZE], char sub
     }
     client = &_comm;
   }
+
+  //!!!!!!!!!!!!!!!!SUBSCRIBE : OPEN SOCKET
 
   else if (type == 's') {
 
@@ -45,67 +47,52 @@ void KP::transaction(char type, Triple *t , char query[MAX_QUERY_SIZE], char sub
 
   }
 
-  delay(50);
+  delay(YIELDING_TIME);
 
-  while (i < 3) {
+  //!!!!!!!!!!!!!!!!!ACTUAL TRANSACTION
 
-    switch (i) {
+  sendMessage(type, t , subid, client);
+  delay(YIELDING_TIME);
+  receiveReply(type);
+  delay(YIELDING_TIME);
 
-      case 0:
-
-        sendMessage(type, t , query, subid, client);
-        delay(500);
-        break;
-
-      case 1:
-
-        receiveReply(type);
-
-        break;
-
-      case 2:
-        //store();
-        break;
-    }
-
-    i++;
-  }
-
-  if (_comm.connected()) _comm.stop();
+  if (_comm.connected()) _comm.stop();  //NOT FOR SUBSCRIPTION : SOCKET MUST BE LEFT OPENED
 
 }
 
 void KP::join() {
-  transaction('j', NULL, "", "");
+  transaction('j');
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
 void KP::insert(Triple *t) {
-  transaction('i', t, "", "");
+  transaction('i', t);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
 void KP::leave() {
-  transaction('l', NULL, "", "");
+  transaction('l');
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
 
 
 void KP::query(char query[MAX_QUERY_SIZE]) {
-  transaction('q', NULL, query, "");
+  strcpy(_query, query);
+  transaction('q');
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------
+
+void KP::subscribe(char query[MAX_QUERY_SIZE]) {
+  strcpy(_query, query);
+  transaction('s');
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------
 /*
-  void KP::subscribe() {
-  transaction('l', NULL);
-  }
-
-  //------------------------------------------------------------------------------------------------------------------------------------
-
   void KP::unsubscribe(Subscription sub) {
   transaction('l', NULL);
   }

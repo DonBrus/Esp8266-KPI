@@ -28,9 +28,10 @@ const PROGMEM char insertTemplate[]="<SSAP_message>\
 </parameter>\
 </SSAP_message>";
 
+
 const PROGMEM char queryTemplate[]="<SSAP_message>\
-<transaction_type>QUERY</transaction_type>\
 <message_type>REQUEST</message_type>\
+<transaction_type>QUERY</transaction_type>\
 <transaction_id></transaction_id>\
 <node_id></node_id>\
 <space_id>X</space_id>\
@@ -38,9 +39,10 @@ const PROGMEM char queryTemplate[]="<SSAP_message>\
 <parameter name = \"query\"></parameter>\
 </SSAP_message>";
 
+
 const PROGMEM char subscribeTemplate[]={"<SSAP_message>\
+<message_type>REQUEST</message_type>\  
 <transaction_type>SUBSCRIBE</transaction_type>\
-<message_type>REQUEST</message_type>\
 <transaction_id></transaction_id>\
 <node_id></node_id>\
 <space_id>X</space_id>\
