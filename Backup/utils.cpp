@@ -17,7 +17,7 @@ bool WiFiConnect(const char ssid[], const char pass[]) {
       return WIFI_TIME_OUT;
     }
 
-    delay(50);
+    delay(100);
     Serial.print(".");
 
   }

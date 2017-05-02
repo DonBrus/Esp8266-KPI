@@ -27,9 +27,14 @@ byte KP::getState() {
   return _status;
 }
 
+Result* KP::getResults() {
+  return _list;
+}
+
+
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void KP::sendMessage(char type, Triple *t , char subid[MAX_SUBID_SIZE] , WiFiClient *comm) {
+void KP::sendMessage(char type, Triple *t , char subid[MAX_SUBID_SIZE] , WiFiClient *comm, char query[MAX_QUERY_SIZE]) {
 
   #ifdef DEBUG
   Serial.println(F("-----------COMPOSING----------"));
@@ -68,6 +73,11 @@ void KP::sendMessage(char type, Triple *t , char subid[MAX_SUBID_SIZE] , WiFiCli
       strcpy(buffer, leaveTemplate);
       break;
 
+    case 'u':
+      strcpy(buffer, unsubscribeTemplate);
+      break;
+
+
   }
 
   //----------------------START MESSAGE CREATION--------------------
@@ -96,7 +106,7 @@ void KP::sendMessage(char type, Triple *t , char subid[MAX_SUBID_SIZE] , WiFiCli
 
       case 'q':   //QUERY
         strcpy_P(curr.type, PSTR("<parameter name = \"query\">"));
-        strcpy(curr.content, _query);
+        strcpy(curr.content, query);
         state = 'z';
         break;
 
@@ -109,6 +119,9 @@ void KP::sendMessage(char type, Triple *t , char subid[MAX_SUBID_SIZE] , WiFiCli
 
     }
 
+    Serial.println(curr.type);
+    Serial.println(curr.content);
+    
     loc = strstr(buffer, curr.type);  //locate the tag substring inside the template
 
     if (loc != NULL) {
@@ -123,7 +136,8 @@ void KP::sendMessage(char type, Triple *t , char subid[MAX_SUBID_SIZE] , WiFiCli
 
     //----------------------TRIPLE INSERT--------------------------
 
-    if (state == 'i') { //INSERT set of triples to insert into the buffer
+    if (state == 'i' && type == 'i') { //INSERT set of triples to insert into the buffer
+
       loc = strstr(buffer, "<triple_list>");  //trova il punto di inizio della lista
 
       if (loc != NULL) {
@@ -157,25 +171,26 @@ void KP::sendMessage(char type, Triple *t , char subid[MAX_SUBID_SIZE] , WiFiCli
       state = 'z'; //finisci di generare contenuto per l'insert
     }
 
-    delay(YIELDING_TIME);
+    //    delay(YIELDING_TIME);
 
   } while (state != 'z') ;
 
-  //Serial.println(buffer);
-  comm->print(buffer);
-
+  Serial.println(buffer);
+  delay(YIELDING_TIME);
+  comm->println(buffer);
   _status = OK;
-  return;
+  Serial.println("SENT");
 
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void KP::receiveReply(char type) {
+char KP::receiveReply(char type, WiFiClient *comm) {
 
   char buffer[MAX_BUFFER_SIZE] = "";
-  char search[50] = "", result[50] = "";
-  char state = 'c', *loc = NULL; //partire da integrità logica del messaggio (es JOIN=JOIN)
+  char search[50] = "";
+  char state = 'i', last; //partire da integrità logica del messaggio (es JOIN=JOIN)
+  char *loc = NULL;
 
   short i = 0, pos = 0;
 
@@ -186,62 +201,78 @@ void KP::receiveReply(char type) {
   Serial.println(F("WAITING FOR RESPONSE"));
 
   while (!replied && tries++ <= 3) {
-    if (_comm.available()) {
+
+    if (comm->available()) {
       char c;
       replied = true;
-      while (_comm.available()) {
-        buffer[i++] = _comm.read();
+      while (comm->available()) { //read the response
+        buffer[i++] = comm->read();
       }
     }
+
     else {
       delay(TIME_BETWEEN_TRIES);
     }
+
   }
 
   if (!replied) {
     Serial.println(F("NO REPLY"));
-    return;
+    return NO_REPLY;
   }
 
   else Serial.println(buffer);
 
-  //ricerca dei vari risultati
-  //!!!!!!!!!!!!!!!!! -> Fare il check che la transazione nella risposta == quello che ci si aspetta (es. JOIN in risposta a JOIN)
+  delay(YIELDING_TIME);
+
+  //!!!!!!!!!!!!!!!!!  PARSING !!!!!!!!!!!!!!!!!!!!
+
+  //Check se la risposta è sensata o è stato inviato un messaggio errato : <SSAP_message />
+  if (strcmp_P(buffer, PSTR("<SSAP_message />")) == 0) {
+    return SENT_BAD_MESS;
+  }
 
   do {
 
+    last = state;
+
     switch (state) {
 
+      //Cerca transaction type -> prendi prima lettera -> lowercase -> compara al type
       case 'i': //integrity
-        switch (type) {
-          case 'j':
-            ;
-        }
-
+        strcpy_P(search, PSTR("<transaction_type>"));
+        state = 'c';
+        break;
 
       case 'c': //message type
         strcpy_P(search, PSTR("<message_type>")); //CONFIRM ; INDICATION ;
         if (type == 'j' || type == 'l' || type == 'u' || type == 'i')  state = 'f'; //finished
-        else return; //altri tipi
+        else if (type == 'q') state = 'r'; //for queries , only results are importante
+        else state = 's'; //for sub and not. first get the subscription id
         break;
 
       case 's': //sub_id, for subscribe and notification
+        strcpy_P(search, PSTR("<parameter name=\"subscription_id\">"));
+        if (type == 's') state = 'f'; //subscribe only needs the subscription id , notif goes on reading the results
+        else state='r'; //for notifications
         break;
 
-      case 't': //triples , for query and notification
-        break;
-
-
-      case 'f':
-        break;
+      case 'r': //results , for query and notification
+        _list = queryParser(buffer);
+        if (_list == NULL) return NO_RESULTS;
+        return OK;  //stop here as we've searched everything we had to search for, as queries and notifications don't need the following part at this point
 
     }
 
     loc = strstr(buffer, search); //ricerca il risultato
+
     Serial.print("Searching for : ");
     Serial.println(search);
 
+    char result[100] = "";
+
     if (loc != NULL) {
+
       pos = loc - buffer + strlen(search);
 
       for (i = pos; buffer[i] != '<'; i++) {
@@ -250,14 +281,87 @@ void KP::receiveReply(char type) {
 
       Serial.print("RESULT: ");
       Serial.println(result);
+
     }
 
+    else return BAD_REPLY; //if tags like transaction_type or confirmation aren't to be found inside the buffer , there's been a problem while receiving  the response
+
+    //!!!!!!!!!!!!!!!!! the two checks below aren't to be made for subscription notifications as their xml fields don't match those ones of the others
+
+    if (type != 'n' && last == 'i' && tolower(result[0]) != type) return TYPE_NOT_EQUAL;
+    /*that is , if during the integrity check the first letter ( to lowercase) of the received transaction isn't equal to what we were expecting , there's been an error
+       example type 'i' (during an insert) , message : <transaction_type>JOIN</transaction_type>
+       result = JOIN , result[0]=J , tolower -> j , 'i'!='j' -> return an error
+    */
+
+    if (type != 'n' && last == 'c' && strcmp(result, "CONFIRM") != 0) { //whatever transaction , an error occured and it hasn't been confirmed (could be a re join , not joined , etc..)
+    return NOT_CONFIRMED;
+  }
+
+  if (type == 's' && last == 's') {
+    if (comm == &_s1) strcpy(_subID1, result); //se abbiamo attivato la sub1 ...
+      else strcpy(_subID2, result); //o la sub 2
+    }
 
   } while (state != 'f');
 
-
+  return OK;
 
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+/*
+   This function helps the receiveReply function to build the list of results in case of a query or notification transaction
+   It iterates the reply message in search of results looking for <result> and </result> tags ; variable can be either be 0 (no results), 1,2 or 3
+   For every result , a new Result struct node is created , filled (if possible) with variables , then moves on the next one (if any)
+   Return values can be either be an empty list or a non-empty one ; in the former case ,this is considered as a NO_RESULTS error (and KP::_list is set as NULL); while in the latter
+   case , the list pointer is then moved inside the object and can be requested by the user via the getResults method, which returns the handler to the last created list.
+*/
+Result* KP::queryParser(char *buffer) {
+
+  if (strstr(buffer, "<results />") != NULL)  return NULL; //this tag is found in the reply whenever there are no results
+
+  char *iloc,  *ibin, *ebin;
+  byte var = 0;
+
+  iloc = strstr(buffer, "<result>"); //try to find a result
+
+  Result *list = new Result, *index = list; //create first result struct of the list (we know there's gotta be at least one)
+
+  while (iloc != NULL) { //for every new result
+
+    ibin = strstr(iloc, "<binding"); //go search for the variable binding
+
+    while (ibin != NULL & var < 3) {
+
+      char varb[MAX_VAR_SIZE] = "";
+      byte size = 0;
+      ibin = strstr(ibin, ">"); //move start of binding to end of <binding..> tag , that is at the start of the variable
+      ebin = strstr(ibin, "</binding>"); //also  use this other pointer to get to the end of the variable
+      size = ebin - ibin; //size of the variable
+      strncpy(varb, ibin + 1, size - 1); //+1 , -1 to take into account "<" and ">"
+
+      Serial.println(varb); //debug
+
+      if (var == 0) strcpy(index->var1, varb);  //fill consecutive fields of the current result (from none , up to three variables)
+      else if (var == 1) strcpy(index->var2, varb);
+      else strcpy(index->var3, varb);
+
+      ibin = strstr(ibin, "<binding");  //start looking for another binding
+      var++;  //up to three variable max
+      delay(0);
+
+    }
+
+    var = 0; //reset variables counter
+    iloc = strstr(iloc + 1, "<result>"); //go search for another result (+1 to avoid repeating always the same one)
+    if (iloc == NULL)  index->next = NULL;
+    else {
+      index->next = new Result;
+      index = index->next;
+    }
+
+  }
+  return list;
+}
