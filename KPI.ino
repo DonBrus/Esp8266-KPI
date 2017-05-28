@@ -1,21 +1,26 @@
 #include "KPI.h"
 #include <Ticker.h>
+#include <Wire.h>
 
 KP kpi("Huzzah");
 
+#define NETSSID "Alice-55361560"
+#define NETPSW  "20c1af385935b78a3mea1385"
+#define IP 10010, 192, 168, 1, 14
 
-//#define NETSSID "Alice-55361560"
-//#define NETPSW  "20c1af385935b78a3mea1385"
-
-#define NETSSID "GATEWAY"
-#define NETPSW  "abcd1234"
+//#define NETSSID "GATEWAY"
+//#define NETPSW  "abcd1234"
+//#define IP 10010, 192, 168, 43, 52
 
 void setup() {
   Serial.begin(115200);
+  Wire.begin();   //join i2c as master
+
+  pinMode(12, OUTPUT);  //used for master triggered interrupt
+  digitalWrite(12, HIGH);
 
   do {
-    //kpi.begin(NETSSID, NETPSW, 10010, 192, 168, 1, 14);
-    kpi.begin(NETSSID, NETPSW, 10010, 192, 168, 43, 52);
+    kpi.begin(NETSSID, NETPSW, IP);
   } while (kpi.getState() != 0);
 
   delay(YIELDING_TIME); //for esp bg functions
@@ -36,7 +41,7 @@ void setup() {
 
   checkList(list);
 
-  char q[] = "PREFIX ss: &lt;http://arduArm.com/ss#&gt; SELECT ?state WHERE {ss:Huzzah ss:LedIs ?state} LIMIT 1";
+  char q[] = "PREFIX ss: &lt;http://arduArm.com/ss#&gt; SELECT ?task WHERE {ss:MeArm ss:TaskIs ?task} LIMIT 1";
 
   if (kpi.join()) Serial.println("JOIN OK");
   yield();
@@ -45,13 +50,14 @@ void setup() {
   //  yield();
 
 
-  //  if (kpi.query(q)) Serial.println("QUERY OK");
-  //  yield();
+  if (kpi.query(q)) Serial.println("QUERY OK");
+  yield();
 
 
   if (kpi.subscribe(q))  Serial.println("SUB OK");
   yield();
-
+  Result *r = kpi.getResults();
+  checkResults(r);
 
   //  kpi.unsubscribe(1);
   //  yield();
@@ -61,8 +67,7 @@ void setup() {
   //  yield();
   //
   //
-  //  Result *r = kpi.getResults();
-  //  checkResults(r);
+
 
   pinMode(LED_BUILTIN, OUTPUT);
 }
@@ -73,8 +78,12 @@ void loop() {
     Serial.println("NEW RESULTS!");
     Result *r = kpi.getResults();
     checkResults(r);
-    if (strstr(r->var1, "#On") != NULL) digitalWrite(LED_BUILTIN, LOW);
-    else  if (strstr(r->var1, "#Off") != NULL)  digitalWrite(LED_BUILTIN, HIGH);
+
+    if (strstr(r->var1, "#Stop") != NULL) Serial.println("ARM : STOP");
+    else  if (strstr(r->var1, "#Task1") != NULL)  Serial.println("ARM : TASK 1");
+    else  if (strstr(r->var1, "#Task2") != NULL)  Serial.println("ARM : TASK 2");
+    else Serial.println("ARM : TASK NOT FOUND");
+
   }
   delay(1000);
 

@@ -16,17 +16,17 @@
 
 #define DEBUG 1
 
-#define MAX_SSID_LENGTH 20
-#define MAX_PSW_LENGTH 20
+#define MAX_SSID_LENGTH 50
+#define MAX_PSW_LENGTH 50
 
 #define MAX_BUFFER_SIZE 1500
-#define MAX_NAME_SIZE 100
+#define MAX_NAME_SIZE 200
 #define MAX_CONTENT_SIZE 300
-#define MAX_URI_SIZE 100
-#define MAX_ID_SIZE 30
-#define MAX_SUBID_SIZE 50
+#define MAX_URI_SIZE 200
+#define MAX_ID_SIZE 50
+#define MAX_SUBID_SIZE 100
 #define MAX_QUERY_SIZE 300
-#define MAX_VAR_SIZE 100
+#define MAX_VAR_SIZE 200
 
 #define MAX_SUBS 2
 
