@@ -2,18 +2,18 @@
 #include <Ticker.h>
 #include <Wire.h>
 
-KP kpi("Huzzah");
+KP kpi("NodeX");
 
 #define SLAVE_INT_PIN 12
 #define SLAVE_INT_IN 14
 
-#define NETSSID "Alice-55361560"
-#define NETPSW  "20c1af385935b78a3mea1385"
-#define IP 10010, 192, 168, 1, 14
+//#define NETSSID "Alice-55361560"
+//#define NETPSW  "20c1af385935b78a3mea1385"
+//#define IP 10010, 192, 168, 1, 14
 
-//#define NETSSID "GATEWAY"
-//#define NETPSW  "abcd1234"
-//#define IP 10010, 192, 168, 43, 52
+#define NETSSID "GATEWAY"
+#define NETPSW  "abcd1234"
+#define IP 10010, 192, 168, 43, 36
 
 boolean armOk = true, reported = false;
 
@@ -37,13 +37,13 @@ void setup() {
   Triple  *c;
 
 
-  strcpy(list->subject, "http://arduArm.com/ss#Huzzah");
-  strcpy(list->predicate, "http://arduArm.com/ss#Wants");
-  strcpy(list->object, "http://arduArm.com/ss#Friends");
+  strcpy(list->subject, "http://arduArm.com/ss#NodeX");
+  strcpy(list->predicate, "http://arduArm.com/ss#IsActive");
+  strcpy(list->object, "http://arduArm.com/ss#True");
   list->next = new Triple;
   c = list->next;
-  strcpy(c->subject, "http://arduArm.com/ss#Huzzah");
-  strcpy(c->predicate, "http://arduArm.com/ss#HasFriend");
+  strcpy(c->subject, "http://arduArm.com/ss#NodeX");
+  strcpy(c->predicate, "http://arduArm.com/ss#Supervise");
   strcpy(c->object, "http://arduArm.com/ss#MeArm");
   c->next = NULL;
 
