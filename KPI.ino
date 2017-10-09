@@ -7,9 +7,6 @@ KP kpi("NodeX");
 #define SLAVE_INT_PIN 12
 #define SLAVE_INT_IN 14
 
-//#define NETSSID "Alice-55361560"
-//#define NETPSW  "20c1af385935b78a3mea1385"
-//#define IP 10010, 192, 168, 1, 14
 
 #define NETSSID "GATEWAY"
 #define NETPSW  "abcd1234"
